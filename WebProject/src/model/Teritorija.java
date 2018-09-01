@@ -8,7 +8,7 @@ public class Teritorija {
 	
 	private String naziv;
 	private double povrsina;
-	private int brStanovnika;
+	private long brStanovnika;
 	
 	
 	public Teritorija() {
@@ -16,7 +16,7 @@ public class Teritorija {
 	}
 
 
-	public Teritorija(String naziv, double povrsina, int brStanovnika) {
+	public Teritorija(String naziv, double povrsina, long brStanovnika) {
 		super();
 		this.naziv = naziv;
 		this.povrsina = povrsina;
@@ -44,7 +44,7 @@ public class Teritorija {
 	}
 
 
-	public int getBrStanovnika() {
+	public long getBrStanovnika() {
 		return brStanovnika;
 	}
 
