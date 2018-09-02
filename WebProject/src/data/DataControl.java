@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 import model.*;
 
 /**
@@ -421,5 +423,151 @@ public Date convertToDate(String datum) throws java.text.ParseException{
 		}
 		
 	}
+	
+public void writeAllData() {
+		
+		PrintWriter out = null;
+		try {
+			writeVolonterJson(this.putanja);
+			writeTeritorijeJson(this.putanja);
+			writeKomentariJson(this.putanja);
+			writeVanredneSitJson(this.putanja);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if ( out != null ) {
+				try {
+					out.close();
+				}
+				catch (Exception e) { 
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
+
+
+//Metode za pronalazenje entiteta iz mape po odgovarajucim kriterijumima.
+
+public Volonter getVolonterByName(String korisnickoIme) {
+	return volonteri.get(korisnickoIme);
+}
+
+public Teritorija getTeritorijaByName(String naziv) {
+	return teritorije.get(naziv);
+}
+
+public Komentar getKomentarById(String id) {
+	return komentari.get(id);
+}
+
+public VanrednaSituacija getVanrednaSituacijaById(String id) {
+	return vanredneSit.get(id);
+}
+
+
+//Metode provere username-a, id-a, itd.
+public boolean korisnickoImePostoji(String korIme) {
+	for(String key : volonteri.keySet()) {
+		if(key.equalsIgnoreCase(korIme)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+public boolean emailPostoji(String email) {
+	for(Volonter v : volonteri.values()) {
+		if((v.getEmail()).equalsIgnoreCase(email)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+public boolean loginUspresan(Volonter vol) {
+	for(Volonter v : volonteri.values()) {
+		if((v.getKorIme()).equalsIgnoreCase(vol.getKorIme())) {
+			if(v.getLozinka().equalsIgnoreCase(vol.getLozinka())) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+public boolean idPostoji(String id) {
+	for(String key : vanredneSit.keySet()) {
+		if(key.equalsIgnoreCase(id)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+public boolean teritorijaPostoji(String naziv) {
+	for(String key : teritorije.keySet()) {
+		if(key.equalsIgnoreCase(naziv)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+//And below just getters and setters.
+
+public String getPutanja() {
+	return putanja;
+}
+
+
+public void setPutanja(String putanja) {
+	this.putanja = putanja;
+}
+
+
+public HashMap<String, Volonter> getVolonteri() {
+	return volonteri;
+}
+
+
+public void setVolonteri(HashMap<String, Volonter> volonteri) {
+	this.volonteri = volonteri;
+}
+
+
+public HashMap<String, Komentar> getKomentari() {
+	return komentari;
+}
+
+
+public void setKomentari(HashMap<String, Komentar> komentari) {
+	this.komentari = komentari;
+}
+
+
+public HashMap<String, Teritorija> getTeritorije() {
+	return teritorije;
+}
+
+
+public void setTeritorije(HashMap<String, Teritorija> teritorije) {
+	this.teritorije = teritorije;
+}
+
+
+public HashMap<String, VanrednaSituacija> getVanredneSit() {
+	return vanredneSit;
+}
+
+
+public void setVanredneSit(HashMap<String, VanrednaSituacija> vanredneSit) {
+	this.vanredneSit = vanredneSit;
+}
+
+
 
 }
