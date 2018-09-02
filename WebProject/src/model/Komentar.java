@@ -11,16 +11,18 @@ public class Komentar {
 	private String tekstKomentara;
 	private Date datumKomentarisanja;
 	private String korisnikKomentara;
+	private String id;
 	
 	public Komentar() {
 		super();
 	}
 
-	public Komentar(String tekstKomentara, Date datumKomentarisanja, String korisnikKomentara) {
+	public Komentar(String tekstKomentara, Date datumKomentarisanja, String korisnikKomentara, String id) {
 		super();
 		this.tekstKomentara = tekstKomentara;
 		this.datumKomentarisanja = datumKomentarisanja;
 		this.korisnikKomentara = korisnikKomentara;
+		this.id = id;
 	}
 	
 
@@ -46,6 +48,14 @@ public class Komentar {
 
 	public void setKorisnikKomentara(String korisnikKomentara) {
 		this.korisnikKomentara = korisnikKomentara;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -16,7 +17,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import model.*;
 
 /**
@@ -37,12 +37,13 @@ public class DataControl {
 	}
 
 
-	public DataControl(String putanja, Volonter v, Teritorija t, Komentar k) {
+	public DataControl(String putanja, Volonter v, Teritorija t, Komentar k, VanrednaSituacija vs) {
 		super();
 		this.putanja = putanja;
 		volonteri.put(v.getKorIme(), v);
 		teritorije.put(t.getNaziv(), t);
 		komentari.put(k.getKorisnikKomentara(), k);
+		vanredneSit.put(vs.getId(), vs);
 		
 	}
 	
@@ -147,15 +148,17 @@ public void readKomentareJson(String putanja) throws IOException, ParseException
 		String tekst = "";
 		String datum = "";
 		String pisac = "";
+		String id = "";
 		
 		for (Object kom : komJsonArray) {
 			JSONObject jkom = (JSONObject) kom;
-			tekst = (String)jkom.get("tekstKomentara");
-			datum = (String)jkom.get("datumKomentarisanja");
-			pisac = (String)jkom.get("korisnikKomentara");
+			tekst = (String) jkom.get("tekstKomentara");
+			datum = (String) jkom.get("datumKomentarisanja");
+			pisac = (String) jkom.get("korisnikKomentara");
+			id = (String) jkom.get("id");
 
 			
-			Komentar newKomentar = new Komentar(tekst, convertToDate(datum), pisac);
+			Komentar newKomentar = new Komentar(tekst, convertToDate(datum), pisac, id);
 			
 			komentari.put(pisac, newKomentar);
 			
@@ -171,14 +174,90 @@ public void readKomentareJson(String putanja) throws IOException, ParseException
 }
 
 
+public void readVanredneSitJson(String putanja) throws IOException, ParseException{
+	
+	JSONParser parser = new JSONParser();
+	
+	try{
+		
+		Object object  = parser.parse(new FileReader(/*putanja + */"DataBaseFolder//VanredneSituacije.json"));
+		JSONObject jsonObj = (JSONObject) object;
+		JSONArray vanredneSitJsonArray = (JSONArray) jsonObj.get("vanredneSituacije");
+		
+
+		String nazivMesta = "";
+		String opstina = "";
+		String opis = "";
+		String datum = "";
+		String lokacija = "";
+		String nivoHitnosti = "";
+		String slika = "";
+		String stanje = "";
+		String id = "";		
+		
+		for (Object vs : vanredneSitJsonArray) {
+			JSONObject jvs = (JSONObject) vs;
+			JSONObject jsonTerRead = (JSONObject) jvs.get("teritorija");
+			
+			nazivMesta = (String)jvs.get("nazivMesta");
+			opstina = (String)jvs.get("opstina");
+			opis = (String)jvs.get("opisDesavanja");
+			datum = (String)jvs.get("datumVreme");
+			lokacija= (String)jvs.get("tacnaLokacija");
+			nivoHitnosti = (String)jvs.get("nivoHitnosti");
+			slika = (String)jvs.get("slikaLokacije");
+			stanje = (String)jvs.get("stanje");
+			
+			Teritorija ter = new Teritorija();
+			ter.setNaziv((String) jsonTerRead.get("naziv"));
+			ter.setPovrsina((double) jsonTerRead.get("povrsina"));
+			ter.setBrStanovnika((long) jsonTerRead.get("brStanovnika"));
+			
+			NivoHitnosti nivo = NivoHitnosti.valueOf(nivoHitnosti);
+			
+			JSONObject jsonVolonterRead = (JSONObject) jvs.get("volonter");
+			String korisnickoIme = (String) jsonVolonterRead.get("korIme");
+			Volonter volonterVs = volonteri.get(korisnickoIme);
+			
+			JSONArray jsonKomentari = (JSONArray) jvs.get("komentari");
+            ArrayList<Komentar> komVs = new ArrayList<Komentar>();
+            
+            if(jsonKomentari != null && jsonKomentari.size()>0 ) {
+            	for(Object kom : jsonKomentari) {
+            		JSONObject kom1 = (JSONObject) kom;
+            		komVs.add(this.komentari.get(kom1.get("id")));
+            	}
+            }
+            
+            id = (String) jvs.get("id");
+			
+			VanrednaSituacija newVs = new VanrednaSituacija(nazivMesta, opstina, opis, 
+			convertToDate(datum), lokacija, ter, nivo, slika, stanje, 
+			volonterVs, komVs, id);
+			
+			
+			vanredneSit.put(id, newVs);
+		}
+	}
+	catch(FileNotFoundException f){
+		f.printStackTrace();
+	}
+	catch (Exception e) {
+		e.printStackTrace();
+	}
+	
+}
+
+
 public Date convertToDate(String datum) throws java.text.ParseException{
 	DateFormat formatter;
 	Date date;
-	formatter = new SimpleDateFormat("yyyy-mm-dd");
+	formatter = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 	date = formatter.parse(datum);
 	return date;
 }
 	
+	@SuppressWarnings("unchecked")
 	public void writeVolonterJson(String putanja){
 		System.out.println("usao u write.");
 		JSONArray ja = new JSONArray();
@@ -212,6 +291,7 @@ public Date convertToDate(String datum) throws java.text.ParseException{
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void writeTeritorijeJson(String putanja){
 		JSONArray ja = new JSONArray();
 		JSONObject jobj = new JSONObject();
@@ -239,6 +319,7 @@ public Date convertToDate(String datum) throws java.text.ParseException{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public void writeKomentariJson(String putanja){
 		JSONArray ja = new JSONArray();
 		JSONObject jobj = new JSONObject();
@@ -246,9 +327,10 @@ public Date convertToDate(String datum) throws java.text.ParseException{
 		for (Komentar k : komentari.values()) {
 			JSONObject jobj2 = new JSONObject();
 			jobj2.put("tekstKomentara", k.getTekstKomentara());
-			DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
+			DateFormat format = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 			jobj2.put("datumKomentarisanja", format.format(k.getDatumKomentarisanja()));
 			jobj2.put("korisnikKomentara", k.getKorisnikKomentara());
+			jobj2.put("id", k.getId());
 			
 			ja.add(jobj2);
 		}
@@ -256,6 +338,80 @@ public Date convertToDate(String datum) throws java.text.ParseException{
 		try{
 			jobj.put("komentari", ja);
 			FileWriter writer = new FileWriter(/*putanja + */"DataBaseFolder//Komentari.json");
+			writer.write(jobj.toString());
+			writer.flush();
+			writer.close();
+		}
+		catch(IOException ee){
+			ee.printStackTrace();
+		}
+		
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public void writeVanredneSitJson(String putanja){
+		JSONArray ja = new JSONArray();
+		JSONObject jobj = new JSONObject();
+		
+		for (VanrednaSituacija vs : vanredneSit.values()) {
+			JSONObject jobj2 = new JSONObject();
+			JSONObject objTeritorija = new JSONObject();	//pisanje objekta teritorija.
+			JSONObject objVolonter = new JSONObject();		//pisanje ojekta volonter.
+			JSONArray arrayKomentara = new JSONArray();		//pisanje liste komentara.
+			
+			jobj2.put("nazivMesta", vs.getNazivMesta());
+			jobj2.put("opstina", vs.getOpstina());
+			jobj2.put("opisDesavanja", vs.getOpisDesavanja());
+			DateFormat format = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+			jobj2.put("datumVreme", format.format(vs.getDatumVreme()));
+			jobj2.put("tacnaLokacija", vs.getTacnaLokacija());
+			
+			objTeritorija.put("naziv", vs.getTeritorija().getNaziv());
+			objTeritorija.put("povrsina", vs.getTeritorija().getPovrsina());
+			objTeritorija.put("brStanovnika", vs.getTeritorija().getBrStanovnika());
+
+			jobj2.put("teritorija", objTeritorija);
+			
+			jobj2.put("nivoHitnosti", vs.getNivoHitnosti().toString());
+			jobj2.put("slikaLokacije", vs.getSlikaLokacije());
+			jobj2.put("stanje", vs.getStanje());
+			
+			if(!(vs.getVolonter() == null)) {	//ako postoji zaduzen volonter upisujemo ga. 
+				objVolonter.put("korIme", vs.getVolonter().getKorIme());
+				objVolonter.put("lozinka", vs.getVolonter().getLozinka());
+				objVolonter.put("ime", vs.getVolonter().getIme());
+				objVolonter.put("prezime", vs.getVolonter().getPrezime());
+				objVolonter.put("telefon", vs.getVolonter().getTelefon());
+				objVolonter.put("email", vs.getVolonter().getEmail());
+				objVolonter.put("teritorija", vs.getVolonter().getTeritorija());
+				objVolonter.put("slika", vs.getVolonter().getSlika());
+				//objVolonter.put("isAdmin", vs.getVolonter().getAdmin());
+				objVolonter.put("stanje", vs.getVolonter().getStanje());
+			}
+			jobj2.put("volonter", objVolonter);
+			
+			if(!(vs.getKomentari() == null)){
+				for (Komentar kom : vs.getKomentari()) {
+					JSONObject objKomentari = new JSONObject();
+					//objKomentari.put("id", k.getId());
+					objKomentari.put("tekstKomentara", kom.getTekstKomentara());
+					objKomentari.put("datumKomentarisanja", format.format(kom.getDatumKomentarisanja()));
+					objKomentari.put("korisnikKomentara", kom.getKorisnikKomentara());
+					objKomentari.put("id", kom.getId());
+					arrayKomentara.add(objKomentari);
+				}
+			}
+			
+			jobj2.put("komentari", arrayKomentara);
+			jobj2.put("id", vs.getId());
+			
+			ja.add(jobj2);
+		}
+		
+		try{
+			jobj.put("vanredneSituacije", ja);
+			FileWriter writer = new FileWriter(/*putanja + */"DataBaseFolder//VanredneSituacije.json");
 			writer.write(jobj.toString());
 			writer.flush();
 			writer.close();

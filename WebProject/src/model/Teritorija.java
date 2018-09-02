@@ -49,7 +49,7 @@ public class Teritorija {
 	}
 
 
-	public void setBrStanovnika(int brStanovnika) {
+	public void setBrStanovnika(long brStanovnika) {
 		this.brStanovnika = brStanovnika;
 	}
 
