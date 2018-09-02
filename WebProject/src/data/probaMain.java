@@ -11,15 +11,20 @@ import model.*;
  */
 public class probaMain {
 
-	public static void main(String[] args) throws IOException, ParseException {
+	public static void main(String[] args) throws IOException, ParseException, java.text.ParseException {
+		DataControl dc = new DataControl();
 		Volonter vol = new Volonter("dsds", "dsds", "dsds", "dsds", "dsds", "dsds", "dsds", "dsds", "dsds");
 		Teritorija ter = new Teritorija("sasasa", 23.44, 1200);
-		DataControl dc = new DataControl("DataBaseFolder//Volonteri.json", vol, ter);
-		dc.writeVolonterJson("DataBaseFolder//Volonteri.json");
-		dc.readVolonterJson("DataBaseFolder//Volonteri.json");
+		Komentar kom = new Komentar("sdasdasfrfwecdqwe", dc.convertToDate("2018-8-1"), "steva");
+		DataControl dc1 = new DataControl("DataBaseFolder//Volonteri.json", vol, ter, kom);
+		dc1.writeVolonterJson("DataBaseFolder//Volonteri.json");
+		dc1.readVolonterJson("DataBaseFolder//Volonteri.json");
 		
-		dc.writeTeritorijeJson("DataBaseFolder//Teritorije.json");
-		dc.readTeritorijeJson("DataBaseFolder//Teritorije.json");
+		dc1.writeTeritorijeJson("DataBaseFolder//Teritorije.json");
+		dc1.readTeritorijeJson("DataBaseFolder//Teritorije.json");
+		
+		dc1.writeKomentariJson("dasd");
+		dc1.readKomentareJson("dsad");
 		
 	}
 

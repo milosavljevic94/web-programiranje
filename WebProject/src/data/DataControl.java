@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.json.simple.JSONArray;
@@ -34,11 +37,12 @@ public class DataControl {
 	}
 
 
-	public DataControl(String putanja, Volonter v, Teritorija t) {
+	public DataControl(String putanja, Volonter v, Teritorija t, Komentar k) {
 		super();
 		this.putanja = putanja;
 		volonteri.put(v.getKorIme(), v);
 		teritorije.put(t.getNaziv(), t);
+		komentari.put(k.getKorisnikKomentara(), k);
 		
 	}
 	
@@ -129,6 +133,51 @@ public void readTeritorijeJson(String putanja) throws IOException, ParseExceptio
 		}
 		
 	}
+
+public void readKomentareJson(String putanja) throws IOException, ParseException{
+	
+	JSONParser parser = new JSONParser();
+	
+	try{
+		
+		Object object  = parser.parse(new FileReader(/*putanja + */"DataBaseFolder//Komentari.json"));
+		JSONObject jsonObj = (JSONObject) object;
+		JSONArray komJsonArray = (JSONArray) jsonObj.get("komentari");
+		
+		String tekst = "";
+		String datum = "";
+		String pisac = "";
+		
+		for (Object kom : komJsonArray) {
+			JSONObject jkom = (JSONObject) kom;
+			tekst = (String)jkom.get("tekstKomentara");
+			datum = (String)jkom.get("datumKomentarisanja");
+			pisac = (String)jkom.get("korisnikKomentara");
+
+			
+			Komentar newKomentar = new Komentar(tekst, convertToDate(datum), pisac);
+			
+			komentari.put(pisac, newKomentar);
+			
+		}
+	}
+	catch(FileNotFoundException f){
+		f.printStackTrace();
+	}
+	catch (Exception e) {
+		e.printStackTrace();
+	}
+	
+}
+
+
+public Date convertToDate(String datum) throws java.text.ParseException{
+	DateFormat formatter;
+	Date date;
+	formatter = new SimpleDateFormat("yyyy-mm-dd");
+	date = formatter.parse(datum);
+	return date;
+}
 	
 	public void writeVolonterJson(String putanja){
 		System.out.println("usao u write.");
@@ -189,5 +238,32 @@ public void readTeritorijeJson(String putanja) throws IOException, ParseExceptio
 		
 	}
 	
+	
+	public void writeKomentariJson(String putanja){
+		JSONArray ja = new JSONArray();
+		JSONObject jobj = new JSONObject();
+		
+		for (Komentar k : komentari.values()) {
+			JSONObject jobj2 = new JSONObject();
+			jobj2.put("tekstKomentara", k.getTekstKomentara());
+			DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
+			jobj2.put("datumKomentarisanja", format.format(k.getDatumKomentarisanja()));
+			jobj2.put("korisnikKomentara", k.getKorisnikKomentara());
+			
+			ja.add(jobj2);
+		}
+		
+		try{
+			jobj.put("komentari", ja);
+			FileWriter writer = new FileWriter(/*putanja + */"DataBaseFolder//Komentari.json");
+			writer.write(jobj.toString());
+			writer.flush();
+			writer.close();
+		}
+		catch(IOException ee){
+			ee.printStackTrace();
+		}
+		
+	}
 
 }
