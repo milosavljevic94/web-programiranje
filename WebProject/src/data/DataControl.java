@@ -3,6 +3,7 @@
  */
 package data;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -11,6 +12,7 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -39,14 +41,14 @@ public class DataControl {
 	}
 
 
-	public DataControl(String putanja, Volonter v, Teritorija t, Komentar k, VanrednaSituacija vs) {
+	public DataControl(String putanja) {
 		super();
 		this.putanja = putanja;
-		volonteri.put(v.getKorIme(), v);
-		teritorije.put(t.getNaziv(), t);
-		komentari.put(k.getKorisnikKomentara(), k);
-		vanredneSit.put(vs.getId(), vs);
-		
+//		volonteri.put(v.getKorIme(), v);
+//		teritorije.put(t.getNaziv(), t);
+//		komentari.put(k.getKorisnikKomentara(), k);
+//		vanredneSit.put(vs.getId(), vs);
+		readAllData(putanja);
 	}
 	
 	public void readVolonterJson(String putanja) throws IOException, ParseException{
@@ -448,6 +450,32 @@ public void writeAllData() {
 		
 	}
 
+public void readAllData(String putanja) {
+	
+	BufferedReader in = null;
+	
+	try {
+		readVolonterJson(putanja);
+		readTeritorijeJson(putanja);
+		readKomentareJson(putanja);
+		readVanredneSitJson(putanja);
+		
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	finally {
+		if ( in != null ) {
+			try {
+				in.close();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+}
+
 
 //Metode za pronalazenje entiteta iz mape po odgovarajucim kriterijumima.
 
@@ -517,7 +545,22 @@ public boolean teritorijaPostoji(String naziv) {
 }
 
 
-//And below just getters and setters.
+//Metode za lakse preuzimanje vrednosti mapa.
+
+public Collection<Volonter> getVolonterValues() {
+	return volonteri.values();
+}
+public Collection<Teritorija> getTeritorijaValues() {
+	return teritorije.values();
+}
+public Collection<Komentar> getKomentarValues() {
+	return komentari.values();
+}
+public Collection<VanrednaSituacija> getVanrednaSituacijaValues() {
+	return vanredneSit.values();
+}
+
+//Metode getera i setera.
 
 public String getPutanja() {
 	return putanja;
